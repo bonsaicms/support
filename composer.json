@@ -1,0 +1,28 @@
+{
+    "name": "bonsaicms/support",
+    "description": "Bonsai CMS Support Package",
+    "keywords": [
+        "laravel",
+        "bonsaicms",
+        "bonsaicms-support"
+    ],
+    "homepage": "https://github.com/bonsaicms/support",
+    "license": "MIT",
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../*"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "laravel/framework": "^8.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "BonsaiCms\\Support\\": "src"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
