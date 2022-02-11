@@ -4,6 +4,8 @@ namespace BonsaiCms\Support\Stubs;
 
 use Illuminate\Pipeline\Pipeline;
 use Illuminate\Support\Facades\File;
+use BonsaiCms\Support\Stubs\Filters\IndentTabs;
+use BonsaiCms\Support\Stubs\Filters\IndentSpaces;
 use BonsaiCms\Support\Stubs\Actions\ReplaceVariables;
 
 abstract class AbstractStub
@@ -11,12 +13,23 @@ abstract class AbstractStub
     protected string $stubContent;
     protected bool $stubContentLoaded = false;
     protected array $generateActions;
+    protected array $filters;
 
     public function __construct(
         protected string $stubFileName,
-        protected array $variables = []
+        protected array $variables = [],
+        array $appendGenerateActions = []
     ) {
         $this->generateActions = $this->initializeGenerateActions();
+        $this->appendGenerateActions($appendGenerateActions);
+        $this->initializeFilters();
+    }
+
+    public function initializeFilters(): void
+    {
+        $this->filters = [
+            'indentSpaces' => IndentSpaces::class
+        ];
     }
 
     public function getStubSuffix(): string
@@ -93,12 +106,15 @@ abstract class AbstractStub
      * Generate
      */
 
-    public function generate(): string
+    public function generate(?array $filters = null): string
     {
         return app(Pipeline::class)
             ->send($this->getStubContent())
             ->through([
-                app(ReplaceVariables::class, [ 'variables' => $this->variables ]),
+                app(ReplaceVariables::class, [
+                    'variables' => $this->variables,
+                    'filters' => $filters ?? $this->getDefaultFilters()
+                ]),
                 ...$this->getGenerateActions(),
             ])
             ->thenReturn();
@@ -109,9 +125,17 @@ abstract class AbstractStub
         return $this->generate();
     }
 
-    public static function make(string $stubFileName, array $variables = []): string
+    public static function make(string $stubFileName, array $variables = [], array $appendGenerateActions = [], ?array $filters = null): string
     {
-        return (new static($stubFileName, $variables))->generate();
+        return (new static($stubFileName, $variables, $appendGenerateActions))->generate($filters);
+    }
+
+    public function getDefaultFilters(): array
+    {
+        return [
+            'indentTabs' => IndentTabs::class,
+            'indentSpaces' => IndentSpaces::class,
+        ];
     }
 
     /*
@@ -149,17 +173,17 @@ abstract class AbstractStub
      * Generate to file
      */
 
-    public function writeToFile(string $filePath, bool $lock = false): int|bool
+    public function writeToFile(string $filePath, bool $lock = false, ?array $filters = null): int|bool
     {
         return File::put(
             $filePath,
-            $this->generate()
+            $this->generate($filters)
         );
     }
 
-    public static function write(string $stubFileName, string $filePath, array $variables = [], bool $lock = false): int|bool
+    public static function write(string $stubFileName, string $filePath, array $variables = [], bool $lock = false, ?array $filters = null): int|bool
     {
-        return (new static($stubFileName, $variables))->writeToFile($filePath, $lock);
+        return (new static($stubFileName, $variables))->writeToFile($filePath, $lock, $filters);
     }
 
     /*
