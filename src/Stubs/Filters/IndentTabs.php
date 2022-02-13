@@ -6,8 +6,8 @@ class IndentTabs extends IndentSpaces
 {
     public function __construct(
         protected int $count,
+        protected bool $skipFirstLine = true,
         protected string $whiteChar = '    ',
         protected string $lineSeparator = PHP_EOL,
-        protected bool $skipFirstLine = true,
     ) { }
 }
