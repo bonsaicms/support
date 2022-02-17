@@ -7,6 +7,7 @@ use Illuminate\Support\Str;
 use Illuminate\Pipeline\Pipeline;
 use BonsaiCms\Support\Stubs\Exceptions\UnknownFilterException;
 use BonsaiCms\Support\Stubs\Exceptions\MalformedFilterException;
+use BonsaiCms\Support\Stubs\Exceptions\UnknownVariableException;
 
 class ReplaceVariables
 {
@@ -63,6 +64,11 @@ class ReplaceVariables
             '/\{\{ *([A-Za-z0-9_]+)(|.*?)? *\}\}/',
             function ($matches) {
                 [ $whole, $variable, $formatter ] = $matches;
+
+                if (! isset($this->variables[$variable])) {
+                    throw new UnknownVariableException($variable);
+                }
+
                 return $this->formatVariableValue(
                     $this->variables[$variable],
                     $formatter
