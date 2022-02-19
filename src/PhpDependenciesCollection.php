@@ -16,6 +16,9 @@ class PhpDependenciesCollection extends Collection
                     Str::finish($namespace, '\\')
                 ));
             })
+            ->filter(
+                static fn ($dependency) => ($dependency !== null)
+            )
             ->sort()
             ->sortBy(fn ($use) => strlen($use))
             ->map(fn ($use) => "use $use;")
