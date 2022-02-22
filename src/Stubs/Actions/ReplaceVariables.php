@@ -61,7 +61,7 @@ class ReplaceVariables
     public function handle($content, Closure $next)
     {
         $content = preg_replace_callback(
-            '/\{\{ *([A-Za-z0-9_]+)(|.*?)? *\}\}/',
+            '/\{\[ *([A-Za-z0-9_]+)(|.*?)? *\]\}/',
             function ($matches) {
                 [ $whole, $variable, $formatter ] = $matches;
 
